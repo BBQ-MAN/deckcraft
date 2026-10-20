@@ -416,7 +416,7 @@ pub fn gallery(
         if sel {
             painter.rect_stroke(rect.expand(1.0), CornerRadius::same(4), Stroke::new(1.5, t.accent), egui::StrokeKind::Inside);
         }
-        if resp.on_hover_text(tr(&tip(i))).clicked() {
+        if resp.on_hover_text(tip(i)).clicked() {
             clicked = Some(i);
         }
     }

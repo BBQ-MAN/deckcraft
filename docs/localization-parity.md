@@ -38,7 +38,7 @@ partly there), **45–80 h** to parity plus native-speaker review.
 | Indonesian | id | 0 (0%) | no | full (Latin) | no | none | yes | 3–5 |
 | Japanese | ja | 0 (0%) | no | renders with system or craft-fonts Japanese faces; IME composition (#101); vertical text is rotated, not laid out vertically | no | none | yes | 4–7 |
 | German | de | 0 (0%) | no | full (Latin) | no | none | yes | 3–5 |
-| Korean | ko | ~1,340 (~95%) | yes / yes / no help | system Hangul fonts, in the interface too; IME composition (#101) | no | **full** (review pending) | yes | 0.5–1 |
+| Korean | ko | ~1,480 (~95%) | yes / yes / no help | system Hangul fonts, in the interface too; IME composition (#101) | no | **full** (review pending) | yes | 0.5–1 |
 | Vietnamese | vi | 0 (0%) | no | stacked diacritics through HarfRust | no | none | **no** (Windows only) | 3–5 |
 
 Other languages shipped: **0** (Ukrainian is in review as PR #34). PowerPoint for Mac ships 16 more
@@ -63,7 +63,7 @@ common misspellings (`crates/engine/src/cmd/review.rs`); see [gaps.md](gaps.md#p
 
 | Date | Change | Summary |
 |---|---|---|
-| 2026-10-15 | major | String catalog keyed by English text, system language (#15) and Preferences › Language, Korean interface (~1,340 strings); Localization ~8% → ~15% |
+| 2026-10-15 | major | String catalog keyed by English text, system language (#15) and Preferences › Language, Korean interface (~1,480 strings); Localization ~8% → ~15% |
 | 2026-10-14 | minor | IME composition in a table cell is underlined in place; the candidate window sits on that cell's caret |
 | 2026-10-12 | minor | IME composition for Chinese, Japanese and Korean, and interface text in any installed script (#101) |
 | 2026-10-10 | major | Created: twelve-language table, ~1,050 UI strings measured, PowerPoint for Mac's 26 languages from its bundle |

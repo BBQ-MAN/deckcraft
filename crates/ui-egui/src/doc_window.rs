@@ -15,7 +15,7 @@ use crate::i18n::tr;
 pub struct DocWindow {
     pub uid: u64,
     pub slide: usize,
-    key: Option<(u64, u64, usize, u32, u32, bool)>,
+    key: Option<(u64, u64, usize, u32, u32, bool, crate::i18n::Lang)>,
     tex: Option<egui::TextureHandle>,
 }
 
@@ -153,7 +153,8 @@ fn ensure_texture(
     h: u32,
     grayscale: bool,
 ) -> Option<egui::TextureHandle> {
-    let key = (uid, revision, slide, w, h, grayscale);
+    // The placeholder prompts are drawn in the interface language.
+    let key = (uid, revision, slide, w, h, grayscale, crate::i18n::current());
     if let Some(win) = app.doc_window.as_ref()
         && win.key == Some(key)
         && let Some(tex) = win.tex.clone()

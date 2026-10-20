@@ -310,9 +310,9 @@ fn master_list(app: &mut SlideApp, ui: &mut Ui) {
                 );
                 let name = match li {
                     Some(l) => m.layouts.get(l).map(|x| x.name.clone()).unwrap_or_default(),
-                    None => format!("{} Slide Master", m.name),
+                    None => crate::i18n::trf("{} Slide Master", &[&m.name]),
                 };
-                let resp = resp.on_hover_text(tr(&name));
+                let resp = resp.on_hover_text(&name);
                 if resp.clicked() {
                     let p = match li {
                         Some(l) => json!({"master": mi, "layout": l}),

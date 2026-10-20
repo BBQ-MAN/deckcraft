@@ -1147,7 +1147,7 @@ fn context_menu(app: &mut SlideApp, resp: &egui::Response) {
                 ui.label(egui::RichText::new("(no spelling suggestions)").weak());
             }
             for to in &w.suggestions {
-                if ui.button(egui::RichText::new(tr(to)).strong()).clicked() {
+                if ui.button(egui::RichText::new(to.as_str()).strong()).clicked() {
                     let p = match w.tag {
                         crate::squiggles::Tag::Shape { id, para } => json!({"shape": id, "para": para, "start": w.start, "word": w.word, "to": to}),
                         crate::squiggles::Tag::Cell { id, row, col, para } => {
@@ -1277,7 +1277,7 @@ fn context_menu(app: &mut SlideApp, resp: &egui::Response) {
                     .and_then(|d| d.doc.masters.first().map(|m| m.layouts.iter().map(|l| (l.name.clone(), l.id.0)).collect()))
                     .unwrap_or_default();
                 for (n, id) in layouts {
-                    if ui.button(tr(&n)).clicked() {
+                    if ui.button(&n).clicked() {
                         let _ = app.run("slide.layout", json!({"layout": id}));
                         ui.close();
                     }

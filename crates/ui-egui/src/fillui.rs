@@ -201,7 +201,7 @@ pub fn gradient_editor(ui: &mut Ui, id: &str, g: &Gradient, sc: &ColorScheme) ->
             GradientShape::Path { path, focus } => {
                 for (l, f) in DIRECTIONS_PATH {
                     let on = focus.iter().zip(f).all(|(a, b)| (a - b).abs() < 1e-3);
-                    if ui.selectable_label(on, l.trim_start_matches("From ")).on_hover_text(tr(l)).clicked() {
+                    if ui.selectable_label(on, tr(l.trim_start_matches("From "))).on_hover_text(tr(l)).clicked() {
                         out = Some(Gradient { shape: GradientShape::Path { path: path.clone(), focus: f }, ..g.clone() });
                     }
                 }

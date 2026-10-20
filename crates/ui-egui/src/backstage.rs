@@ -817,7 +817,7 @@ fn info(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
     let dirty = v.get("dirty").and_then(Value::as_bool).unwrap_or(false);
     ui.label(RichText::new(&title).font(theme::font(24.0)).color(t.accent));
     match &path {
-        Some(p) => dim(ui, tr(p)),
+        Some(p) => dim(ui, p),
         None => dim(ui, tr("Not saved yet")),
     }
     if let Some(p) = &path {
@@ -866,7 +866,7 @@ fn info(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
             egui::Grid::new("backstage_props").num_columns(2).spacing(vec2(18.0, 7.0)).show(ui, |ui| {
                 let row = |ui: &mut Ui, k: &str, val: String| {
                     ui.label(RichText::new(tr(k)).color(t.text_dim));
-                    ui.label(tr(&val));
+                    ui.label(&val);
                     ui.end_row();
                 };
                 if let Some(s) = size {

@@ -116,7 +116,7 @@ Ranked; detail and the full beta plan in [docs/roadmap.md](docs/roadmap.md).
    fills, bevels, connectors, tables, charts, animations, media, sections, masters, 3-D models
    and animation bounce end. Still open: a corpus of real decks, #70, #74, #77, EMF+ records,
    MicroType Express font subsets and SVG. 36–64 h.
-3. **Localization:** catalog, system language (#15), zh-Hans, es, fr, de, ja with IME. 27–46 h.
+3. **Localization:** zh-Hans, es, fr, de, ja (the catalog, system language and Korean are in). 20–35 h.
 4. **Output:** vector PDF, printing. 10–16 h.
 5. **Depth that users hit:** font weights (#69), chart data and elements, Animation Pane timeline,
    presenter view on the right display, native macOS menu bar, Format Shape pane. 33–56 h.
@@ -131,7 +131,7 @@ app's JSON control channel (`deckcraft --control PORT`).
 
 | Date | What landed |
 |---|---|
-| 2026-10-15 | Korean interface: a string catalog keyed by the English text, the language follows the system (#15) or Preferences › Language (`app.language`), ~1,460 Korean strings over the ribbon, menus, palette, dialogs, panes, File tab, slide show and placeholder prompts |
+| 2026-10-15 | Korean interface: a string catalog keyed by the English text, the language follows the system (#15) or Preferences › Language (`app.language`), ~1,480 Korean strings over the ribbon, menus, palette, dialogs, panes, File tab, slide show and placeholder prompts |
 | 2026-10-18 | Native chart sidecar bytes move from JSON arrays into referenced ZIP entries, with shared media byte/item limits and bounded reads; older inline sidecars still load. Synthetic format regressions cover large workbooks and malformed members |
 | 2026-10-17 | Opening a file caps absurd effect sizes (glow, soft edges, shadows, reflections, on shapes, text and table text) at what Format Shape allows: a glow of 10^18 pt in a .pptx made rendering ask for 34 GB and abort |
 | 2026-10-17 | Opening a .deckcraft file whose shapes repeat an id gives the repeats fresh ids (groups, layouts and masters too), so the deck validates and edits by id find one shape |

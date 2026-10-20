@@ -1670,7 +1670,7 @@ fn transitions(app: &mut SlideApp, ui: &mut Ui) {
             vec2(54.0, 56.0),
             sel,
             |p, r, i| paint_transition_tile(p, r, shown.get(i).map(|x| (x.0, x.1)).unwrap_or(("", ""))),
-            |i| shown.get(i).map(|x| x.1.to_string()).unwrap_or_default(),
+            |i| shown.get(i).map(|x| tr(x.1).to_string()).unwrap_or_default(),
         ) && let Some(x) = shown.get(i)
         {
             run(app, "transition.set", json!({"kind": x.0}));
@@ -1923,7 +1923,7 @@ fn animations(app: &mut SlideApp, ui: &mut Ui) {
                     paint_anim_tile(p, r, a.1, a.2, has_sel);
                 }
             },
-            |i| quick.get(i).map(|a| a.1.to_string()).unwrap_or_default(),
+            |i| quick.get(i).map(|a| tr(a.1).to_string()).unwrap_or_default(),
         ) && let Some(a) = quick.get(i)
         {
             run(app, "animation.set", json!({"effect": a.0, "class": a.2.xml()}));
@@ -2621,7 +2621,7 @@ fn picture_format(app: &mut SlideApp, ui: &mut Ui) {
             ui.label(tr("Recolor"));
             let sc = scheme(app);
             let presets = deckcraft_engine::cmd::recolor::presets();
-            let names: Vec<String> = presets.iter().map(|(_, l)| l.clone()).collect();
+            let names: Vec<String> = presets.iter().map(|(_, l)| tr(l).to_string()).collect();
             if let Some(i) = widgets::gallery(
                 ui,
                 presets.len(),
@@ -2681,7 +2681,7 @@ fn picture_format(app: &mut SlideApp, ui: &mut Ui) {
     });
     group(ui, |ui| {
         use deckcraft_engine::cmd::picture_style::{STYLES, look};
-        let names: Vec<String> = STYLES.iter().map(|(_, l)| l.to_string()).collect();
+        let names: Vec<String> = STYLES.iter().map(|(_, l)| tr(l).to_string()).collect();
         if let Some(i) = widgets::gallery(
             ui,
             STYLES.len(),
@@ -2810,7 +2810,7 @@ fn table_design(app: &mut SlideApp, ui: &mut Ui) {
                     paint_table_style(p, r, id, &sc);
                 }
             },
-            |i| quick.get(i).map(|x| x.1.clone()).unwrap_or_default(),
+            |i| quick.get(i).map(|x| tr(&x.1).to_string()).unwrap_or_default(),
         ) && let Some((id, _)) = quick.get(i)
         {
             run(app, "table.style", json!({"style": id}));

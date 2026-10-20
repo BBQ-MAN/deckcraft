@@ -30,7 +30,7 @@ pub fn status_bar(app: &mut SlideApp, ui: &mut Ui) {
         }
         // Transient status message.
         if let Some(msg) = app.fresh_status() {
-            p.text(pos2(rect.min.x + 290.0, rect.center().y), Align2::LEFT_CENTER, &msg, theme::font(12.0), t.accent);
+            p.text(pos2(rect.min.x + 290.0, rect.center().y), Align2::LEFT_CENTER, tr(&msg), theme::font(12.0), t.accent);
             ui.ctx().request_repaint_after(std::time::Duration::from_millis(500));
         }
         let mut right = ui.new_child(
@@ -216,7 +216,7 @@ pub fn notes_pane(app: &mut SlideApp, ui: &mut Ui) {
                         ui.label(egui::RichText::new("(no spelling suggestions)").weak());
                     }
                     for to in &w.suggestions {
-                        if ui.button(egui::RichText::new(tr(to)).strong()).clicked() {
+                        if ui.button(egui::RichText::new(to.as_str()).strong()).clicked() {
                             changed = Some(splice(ls + w.start, to));
                             ui.close();
                         }
