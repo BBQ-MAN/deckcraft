@@ -465,6 +465,8 @@ pub struct SlideApp {
     /// A composition the app settled while the input method was still composing it (a click,
     /// a command): the input method may still commit that text, which is already in place.
     pub ime_settled: Option<String>,
+    /// The input method is to be told to stop composing (see [`SlideApp::settle_ime`]).
+    pub ime_interrupt: bool,
     /// Canvas screen rect and points-per-slide-point scale (for control & tests).
     pub canvas_rect: Option<egui::Rect>,
     /// The Eyedropper is waiting for a click on the slide.
@@ -558,6 +560,7 @@ impl SlideApp {
             synthetic: vec![],
             ime_preedit: None,
             ime_settled: None,
+            ime_interrupt: false,
             canvas_rect: None,
             eyedropper: None,
             canvas_scale: 1.0,
@@ -1545,6 +1548,7 @@ impl SlideApp {
 
     /// Per-frame logic before layout: styles, control requests, screenshots, shortcuts.
     pub fn logic(&mut self, ctx: &egui::Context) {
+        self.settle_ime();
         let scale = self.ui.ui_scale.clamp(0.5, 3.0);
         if (ctx.zoom_factor() - scale).abs() > 1e-3 {
             ctx.set_zoom_factor(scale);
@@ -1664,6 +1668,17 @@ impl SlideApp {
         };
         if let Err(e) = r {
             self.set_status(e.to_string());
+        }
+    }
+
+    /// The app settled a composition (a click, a command, undo) while the input method still
+    /// composes it: the input method is to stop, or its next keystroke would grow the settled
+    /// syllable (하 + ㄴ → 한) at the new insertion point, and its late commit of that text is
+    /// dropped. Checked every frame, whether or not the slide is drawn.
+    pub fn settle_ime(&mut self) {
+        if self.ime_preedit.is_some() && self.session.active().is_none_or(|d| d.composition.is_none()) {
+            self.ime_settled = self.ime_preedit.take();
+            self.ime_interrupt = true;
         }
     }
 

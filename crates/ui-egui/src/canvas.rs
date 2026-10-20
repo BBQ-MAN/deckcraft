@@ -320,13 +320,9 @@ pub fn ime_area(app: &SlideApp, xf: Xf) -> Option<Rect> {
 /// separate jamo (ㅇ ㅏ ㄴ) instead of syllables. A focused text field sets its own.
 fn ime_output(app: &mut SlideApp, ui: &Ui, xf: Xf) {
     let ctx = ui.ctx();
-    // The composition was settled here (a click, a command, undo) while the input method still
-    // composes it: tell the input method to stop, or its next keystroke would grow the syllable
-    // already settled (하 + ㄴ → 한) at the new insertion point.
-    let settled = app.ime_preedit.is_some() && app.session.active().is_none_or(|d| d.composition.is_none());
-    if settled {
-        app.ime_settled = app.ime_preedit.take();
-    }
+    // A click on the canvas this frame may have settled a composition.
+    app.settle_ime();
+    let settled = std::mem::take(&mut app.ime_interrupt);
     if ctx.memory(|m| m.focused().is_some()) || app.dialog.as_ref().is_some_and(|d| d.modal()) || app.palette.is_some() || app.backstage_open() {
         return;
     }

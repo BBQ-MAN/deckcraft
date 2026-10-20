@@ -1235,8 +1235,18 @@ fn a_korean_font_is_the_east_asian_font_too() {
     let run = |s: &Session| s.doc().unwrap().current_slide().unwrap().shapes[0].text.as_ref().unwrap().paragraphs[0].runs[0].props.clone();
     s.execute("format.font", &json!({"family": "NanumGothic"})).unwrap();
     assert_eq!((run(&s).font.as_deref(), run(&s).font_ea.as_deref()), (Some("NanumGothic"), Some("NanumGothic")));
-    s.execute("format.font", &json!({"family": "Lato"})).unwrap();
-    assert_eq!((run(&s).font.as_deref(), run(&s).font_ea.as_deref()), (Some("Lato"), Some("NanumGothic")), "Latin only");
+    // A Latin-only font that is really there (not a stand-in for a missing one).
+    let latin_only = |f: &str| {
+        let face = db.face(f, "Regular");
+        db.has_family(f) && face.family.eq_ignore_ascii_case(f) && !['\u{ac00}', '\u{3042}', '\u{4e00}'].into_iter().any(|c| face.covers(c))
+    };
+    let Some(latin) = [deckcraft_fonts::FALLBACK_FAMILY, "Arial", "Liberation Sans", "DejaVu Sans", "Helvetica"].into_iter().find(|f| latin_only(f))
+    else {
+        eprintln!("skipped the Latin-only half: no Latin-only font here");
+        return;
+    };
+    s.execute("format.font", &json!({"family": latin})).unwrap();
+    assert_eq!((run(&s).font.as_deref(), run(&s).font_ea.as_deref()), (Some(latin), Some("NanumGothic")), "Latin only");
 }
 
 /// #101: Korean typed through an input method arrives as preedit updates (ㅎ → 하 → 한 → 한ㄱ →
