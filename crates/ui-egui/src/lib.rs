@@ -1650,6 +1650,11 @@ impl SlideApp {
             egui::ImeEvent::Commit(text) if self.ime_settled.take().is_some_and(|s| s == *text) => return,
             _ => self.ime_settled = None,
         }
+        // A new composition (or a commit) is not the settled one: an interrupt still waiting for
+        // the slide to be drawn would cut it short.
+        if matches!(e, egui::ImeEvent::Preedit { text, .. } if !text.is_empty()) || matches!(e, egui::ImeEvent::Commit(_)) {
+            self.ime_interrupt = false;
+        }
         let r = match e {
             egui::ImeEvent::Preedit { text, active_range_chars } => {
                 self.ime_preedit = Some(text.clone()).filter(|t| !t.is_empty());
