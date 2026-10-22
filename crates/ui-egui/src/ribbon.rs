@@ -408,7 +408,7 @@ fn layout_menu(app: &mut SlideApp, ui: &mut Ui, cmd: &str) {
                     Stroke::new(if resp.hovered() { 2.0 } else { 1.0 }, if resp.hovered() { t.accent } else { t.border }),
                     egui::StrokeKind::Outside,
                 );
-                ui.add_sized(vec2(96.0, 14.0), egui::Label::new(egui::RichText::new(tr(name)).size(10.5)).truncate());
+                ui.add_sized(vec2(96.0, 14.0), egui::Label::new(egui::RichText::new(name.to_string()).size(10.5)).truncate());
                 resp
             });
             if resp.inner.clicked() {
@@ -489,13 +489,13 @@ fn font_group(app: &mut SlideApp, ui: &mut Ui, st: &Value) {
                 dropdown(ui, "font", &font, 150.0, en, |ui| {
                     for (k, f) in fams.iter().enumerate() {
                         let label = if k == 0 && theme_fonts.len() == 2 {
-                            format!("{f} (Headings)")
+                            format!("{f} ({})", tr("Headings"))
                         } else if k == 1 && theme_fonts.len() == 2 {
-                            format!("{f} (Body)")
+                            format!("{f} ({})", tr("Body"))
                         } else {
                             f.clone()
                         };
-                        if ui.button(egui::RichText::new(tr(&label))).clicked() {
+                        if ui.button(egui::RichText::new(label.as_str())).clicked() {
                             run(app, "format.font", json!({"family": f}));
                             ui.close();
                         }
@@ -1718,13 +1718,13 @@ fn transitions(app: &mut SlideApp, ui: &mut Ui) {
                     .as_ref()
                     .and_then(|t| t.sound)
                     .and_then(|m| app.session.active().and_then(|d| d.doc.media(m).map(|i| i.name.trim_end_matches(".wav").to_string())))
-                    .unwrap_or_else(|| if stop { "[Stop Previous Sound]".into() } else { "[No Sound]".into() });
-                egui::ComboBox::from_id_salt("transition_sound").width(140.0).selected_text(tr(&name)).show_ui(ui, |ui| {
+                    .unwrap_or_else(|| tr(if stop { "[Stop Previous Sound]" } else { "[No Sound]" }).to_string());
+                egui::ComboBox::from_id_salt("transition_sound").width(140.0).selected_text(name.as_str()).show_ui(ui, |ui| {
                     let none = cur.as_ref().is_none_or(|t| t.sound.is_none() && !t.stop_sound);
-                    if ui.selectable_label(none, "[No Sound]").clicked() {
+                    if ui.selectable_label(none, tr("[No Sound]")).clicked() {
                         run(app, "transition.sound", json!({"none": true}));
                     }
-                    if ui.selectable_label(stop, "[Stop Previous Sound]").clicked() {
+                    if ui.selectable_label(stop, tr("[Stop Previous Sound]")).clicked() {
                         run(app, "transition.sound", json!({"stopPrevious": true}));
                     }
                     ui.separator();
@@ -3582,7 +3582,7 @@ fn zoom_menu(app: &mut SlideApp, ui: &mut Ui) {
     egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
         for (i, label) in items.iter().enumerate() {
             let mut on = picked.contains(&i);
-            if ui.checkbox(&mut on, tr(label)).changed() {
+            if ui.checkbox(&mut on, label.as_str()).changed() {
                 if on {
                     picked.push(i);
                 } else {
