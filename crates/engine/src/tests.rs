@@ -1529,7 +1529,7 @@ fn title_text(s: &Session) -> String {
     sh.text.as_ref().map(|t| t.paragraphs.iter().map(|p| p.text()).collect::<Vec<_>>().join("\n")).unwrap_or_default()
 }
 
-/// Picking a Korean font in the Font box sets the East Asian font too, so the Hangul changes; a
+/// Picking a Korean font in the Font box or the Font dialog sets the East Asian font too, so the Hangul changes; a
 /// Latin-only font leaves the East Asian font alone. Found by its Korean name as well.
 #[test]
 fn a_korean_font_is_the_east_asian_font_too() {
@@ -1546,6 +1546,11 @@ fn a_korean_font_is_the_east_asian_font_too() {
     let run = |s: &Session| s.doc().unwrap().current_slide().unwrap().shapes[0].text.as_ref().unwrap().paragraphs[0].runs[0].props.clone();
     s.execute("format.font", &json!({"family": "NanumGothic"})).unwrap();
     assert_eq!((run(&s).font.as_deref(), run(&s).font_ea.as_deref()), (Some("NanumGothic"), Some("NanumGothic")));
+    // The Font dialog does the same.
+    s.execute("edit.undo", &json!({})).unwrap();
+    assert_eq!(run(&s).font_ea, None);
+    s.execute("format.fontDialog", &json!({"family": "NanumGothic"})).unwrap();
+    assert_eq!((run(&s).font.as_deref(), run(&s).font_ea.as_deref()), (Some("NanumGothic"), Some("NanumGothic")), "Font dialog");
     // A Latin-only font that is really there (not a stand-in for a missing one).
     let latin_only = |f: &str| {
         let face = db.face(f, "Regular");

@@ -927,8 +927,11 @@ SFX D Y 1\nSFX D 0 ed/S .\n";
         let got: Vec<(String, String)> = paragraph_words(&p, "en-US").into_iter().map(|w| (w.text, w.lang)).collect();
         assert_eq!(got, vec![("Hello".into(), "xx-HG".into()), ("안녕하세요".into(), "ko-KR".into()), ("world".into(), "xx-HG".into())]);
         install("xx-HG", d());
-        let flagged: Vec<String> = misspelt(&p, "en-US", &[]).into_iter().map(|w| w.text).collect();
-        assert!(!flagged.iter().any(|w| w == "안녕하세요"), "{flagged:?}");
+        // An installed Korean dictionary would decide on its own.
+        if dictionary("ko-KR").is_none() {
+            let flagged: Vec<String> = misspelt(&p, "en-US", &[]).into_iter().map(|w| w.text).collect();
+            assert!(!flagged.iter().any(|w| w == "안녕하세요"), "{flagged:?}");
+        }
         // Latin and Hangul written together are two words; Konkani (`kok`) isn't Korean.
         let p =
             Paragraph { runs: vec![Run::with("PPT발표", RunProps { lang: Some("kok-IN".into()), ..Default::default() })], ..Default::default() };

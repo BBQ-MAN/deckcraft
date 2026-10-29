@@ -396,6 +396,24 @@ fn localized_families(f: &skrifa::FontRef<'_>, family: &str) -> Vec<String> {
     out
 }
 
+/// Records the localized family names of every face in font file `data` in `aliases` (lower
+/// case → family), keeping names already there.
+#[cfg(not(target_arch = "wasm32"))]
+fn add_aliases(aliases: &mut HashMap<String, String>, data: &[u8]) {
+    let count = match FileRef::new(data) {
+        Ok(FileRef::Font(_)) => 1,
+        Ok(FileRef::Collection(c)) => c.len(),
+        Err(_) => 0,
+    };
+    for i in 0..count {
+        let Ok(f) = skrifa::FontRef::from_index(data, i) else { continue };
+        let Some((family, _)) = face_names(&f) else { continue };
+        for l in localized_families(&f, &family) {
+            aliases.entry(l.to_lowercase()).or_insert_with(|| family.clone());
+        }
+    }
+}
+
 /// A face's family and style names (the default instance's style for a variable font).
 fn face_names(f: &skrifa::FontRef<'_>) -> Option<(String, String)> {
     let family = name(f, &[StringId::TYPOGRAPHIC_FAMILY_NAME, StringId::FAMILY_NAME])?;
@@ -800,7 +818,11 @@ impl FontDb {
     /// without `CRAFT_FONTS_DIR`), whose system font scan reads `font_dirs`.
     pub fn with_font_dirs(font_dirs: Vec<std::path::PathBuf>) -> Self {
         let mut faces = Vec::new();
+        #[cfg(not(target_arch = "wasm32"))]
+        let mut aliases = HashMap::new();
         for data in bundled() {
+            #[cfg(not(target_arch = "wasm32"))]
+            add_aliases(&mut aliases, data);
             for (i, family, style, coords) in enumerate_faces(data) {
                 if let Some(f) = make_face(FontBytes::Static(data), i, family, style, coords) {
                     faces.push(Arc::new(f));
@@ -813,7 +835,7 @@ impl FontDb {
             #[cfg(not(target_arch = "wasm32"))]
             catalog: RwLock::new(Vec::new()),
             #[cfg(not(target_arch = "wasm32"))]
-            aliases: RwLock::new(HashMap::new()),
+            aliases: RwLock::new(aliases),
             font_dirs,
             #[cfg(not(target_arch = "wasm32"))]
             cataloged: std::sync::OnceLock::new(),
@@ -898,8 +920,12 @@ impl FontDb {
             faces.iter().any(|f| f.family.eq_ignore_ascii_case(family) && f.style.eq_ignore_ascii_case(style))
         };
         let mut new = Vec::new();
+        #[cfg(not(target_arch = "wasm32"))]
+        let mut aliases = HashMap::new();
         for bytes in files {
             let data = Arc::new(bytes);
+            #[cfg(not(target_arch = "wasm32"))]
+            add_aliases(&mut aliases, &data);
             for (i, family, style, coords) in enumerate_faces(&data) {
                 if present(&self.read_faces(), &family, &style) {
                     continue;
@@ -909,6 +935,8 @@ impl FontDb {
                 }
             }
         }
+        #[cfg(not(target_arch = "wasm32"))]
+        self.merge_aliases(aliases);
         let mut faces = self.faces.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         let mut added = 0;
         for f in new {
@@ -1004,8 +1032,18 @@ impl FontDb {
         let n = found.len();
         log::debug!("cataloged {n} system font faces");
         *self.catalog.write().unwrap_or_else(std::sync::PoisonError::into_inner) = found;
-        *self.aliases.write().unwrap_or_else(std::sync::PoisonError::into_inner) = aliases;
+        // Merged, not replaced: the bundled and added fonts' names stay, and come first.
+        self.merge_aliases(aliases);
         n
+    }
+
+    /// Adds localized family names to [`FontDb::canonical`]'s, keeping the names already known.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn merge_aliases(&self, new: HashMap<String, String>) {
+        let mut all = self.aliases.write().unwrap_or_else(std::sync::PoisonError::into_inner);
+        for (l, family) in new {
+            all.entry(l).or_insert(family);
+        }
     }
 
     /// Load the files of the installed `family` (faces already loaded are kept). Returns whether
@@ -1480,7 +1518,7 @@ mod font_dir_tests {
     use super::*;
 
     /// A deck made on a Korean system names its fonts in Korean ("나눔고딕", "맑은 고딕"): the
-    /// installed family is found by that name, as by its English one.
+    /// installed or added family is found by that name, as by its English one.
     #[test]
     fn installed_fonts_are_found_by_their_korean_names() {
         let Some(dir) =
@@ -1489,11 +1527,16 @@ mod font_dir_tests {
             eprintln!("skipped: built without craft-fonts (set CRAFT_FONTS_DIR)");
             return;
         };
-        let db = FontDb::with_font_dirs(vec![dir]);
+        let db = FontDb::with_font_dirs(vec![dir.clone()]);
         assert!(db.has_family("나눔고딕"), "the Korean name of NanumGothic");
         assert_eq!(db.canonical("나눔고딕"), "NanumGothic");
         assert_eq!(db.canonical("Not A Font"), "Not A Font");
         assert_eq!(db.face("나눔고딕", "Bold").family, "NanumGothic");
+        // Not installed but added to the session (`font.add`): found by its Korean name too.
+        let added = FontDb::with_font_dirs(vec![]);
+        added.add_font(std::fs::read(dir.join("NanumGothic-Regular.ttf")).unwrap());
+        assert!(added.has_family("나눔고딕"), "an added font's Korean name");
+        assert_eq!(added.canonical("나눔고딕"), "NanumGothic");
     }
 
     #[test]
